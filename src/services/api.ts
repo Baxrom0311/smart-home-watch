@@ -62,6 +62,48 @@ async function downloadBlob(url: string, params: Record<string, unknown>, fallba
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
+// Defensive helpers — backend may occasionally return wrapped or unexpected shapes.
+function toArray<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+  }
+  return [];
+}
+
+function toListResponse<T>(data: unknown): { total: number; items: T[] } {
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const obj = data as Record<string, unknown>;
+    const items = toArray<T>(obj.items ?? data);
+    const total = typeof obj.total === "number" ? obj.total : items.length;
+    return { total, items };
+  }
+  const items = toArray<T>(data);
+  return { total: items.length, items };
+}
+
+function normalizeStatus(data: any): ModelStatus {
+  return {
+    state: data?.state ?? "idle",
+    sensor_type: data?.sensor_type ?? null,
+    source_file: data?.source_file ?? null,
+    message: data?.message ?? null,
+    started_at: data?.started_at ?? null,
+    finished_at: data?.finished_at ?? null,
+    training_id: data?.training_id ?? null,
+    progress: typeof data?.progress === "number" ? data.progress : 0,
+    current_epoch: data?.current_epoch ?? null,
+    total_epochs: data?.total_epochs ?? null,
+    train_loss: data?.train_loss ?? null,
+    val_loss: data?.val_loss ?? null,
+    loss_history: Array.isArray(data?.loss_history) ? data.loss_history : [],
+    val_loss_history: Array.isArray(data?.val_loss_history) ? data.val_loss_history : [],
+  };
+}
+
 export const api = {
   // Health
   health: () => apiClient.get<{ status?: string }>("/health").then((r) => r.data),
