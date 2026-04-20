@@ -62,12 +62,55 @@ async function downloadBlob(url: string, params: Record<string, unknown>, fallba
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
+// Defensive helpers — backend may occasionally return wrapped or unexpected shapes.
+function toArray<T>(data: unknown): T[] {
+  if (Array.isArray(data)) return data as T[];
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, unknown>;
+    if (Array.isArray(obj.items)) return obj.items as T[];
+    if (Array.isArray(obj.data)) return obj.data as T[];
+    if (Array.isArray(obj.results)) return obj.results as T[];
+  }
+  return [];
+}
+
+function toListResponse<T>(data: unknown): { total: number; items: T[] } {
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const obj = data as Record<string, unknown>;
+    const items = toArray<T>(obj.items ?? data);
+    const total = typeof obj.total === "number" ? obj.total : items.length;
+    return { total, items };
+  }
+  const items = toArray<T>(data);
+  return { total: items.length, items };
+}
+
+function normalizeStatus(data: any): ModelStatus {
+  return {
+    state: data?.state ?? "idle",
+    sensor_type: data?.sensor_type ?? null,
+    source_file: data?.source_file ?? null,
+    message: data?.message ?? null,
+    started_at: data?.started_at ?? null,
+    finished_at: data?.finished_at ?? null,
+    training_id: data?.training_id ?? null,
+    progress: typeof data?.progress === "number" ? data.progress : 0,
+    current_epoch: data?.current_epoch ?? null,
+    total_epochs: data?.total_epochs ?? null,
+    train_loss: data?.train_loss ?? null,
+    val_loss: data?.val_loss ?? null,
+    loss_history: Array.isArray(data?.loss_history) ? data.loss_history : [],
+    val_loss_history: Array.isArray(data?.val_loss_history) ? data.val_loss_history : [],
+  };
+}
+
 export const api = {
   // Health
   health: () => apiClient.get<{ status?: string }>("/health").then((r) => r.data),
 
   // Data
-  listSamples: () => apiClient.get<SampleDataset[]>("/api/data/samples").then((r) => r.data),
+  listSamples: () =>
+    apiClient.get("/api/data/samples").then((r) => toArray<SampleDataset>(r.data)),
   importSample: (body: SampleImportRequest) =>
     apiClient.post<UploadResponse>("/api/data/import-sample", body).then((r) => r.data),
   uploadCsv: (file: File, sensor_type?: string) => {
@@ -79,14 +122,14 @@ export const api = {
       .then((r) => r.data);
   },
   listData: (params: { sensor_type?: string; source_file?: string; limit?: number; offset?: number } = {}) =>
-    apiClient.get<DataListResponse>("/api/data/list", { params }).then((r) => r.data),
+    apiClient.get("/api/data/list", { params }).then((r) => toListResponse<SensorData>(r.data)),
   stats: (params: { sensor_type?: string; source_file?: string } = {}) =>
     apiClient.get<DataStats>("/api/data/stats", { params }).then((r) => r.data),
   sources: (sensor_type?: string) =>
     apiClient
-      .get<DataSource[]>("/api/data/sources", { params: sensor_type ? { sensor_type } : {} })
-      .then((r) => r.data),
-  sensors: () => apiClient.get<string[]>("/api/data/sensors").then((r) => r.data),
+      .get("/api/data/sources", { params: sensor_type ? { sensor_type } : {} })
+      .then((r) => toArray<DataSource>(r.data)),
+  sensors: () => apiClient.get("/api/data/sensors").then((r) => toArray<string>(r.data)),
   deleteSource: (source_file: string) =>
     apiClient.delete(`/api/data/source/${encodeURIComponent(source_file)}`).then((r) => r.data),
   deleteSensor: (sensor_type: string) =>
@@ -96,9 +139,10 @@ export const api = {
 
   // Model
   train: (body: TrainingRequest) =>
-    apiClient.post<ModelStatus>("/api/model/train", body).then((r) => r.data),
-  status: () => apiClient.get<ModelStatus>("/api/model/status").then((r) => r.data),
-  history: () => apiClient.get<TrainingResponse[]>("/api/model/history").then((r) => r.data),
+    apiClient.post<ModelStatus>("/api/model/train", body).then((r) => normalizeStatus(r.data)),
+  status: () => apiClient.get<ModelStatus>("/api/model/status").then((r) => normalizeStatus(r.data)),
+  history: () =>
+    apiClient.get("/api/model/history").then((r) => toArray<TrainingResponse>(r.data)),
   historyDetail: (id: number) =>
     apiClient.get<TrainingResponse>(`/api/model/history/${id}`).then((r) => r.data),
 
@@ -106,7 +150,7 @@ export const api = {
   detect: (body: AnomalyDetectionRequest) =>
     apiClient.post<AnomalyDetectionResponse>("/api/anomaly/detect", body).then((r) => r.data),
   results: (params: { sensor_type?: string; source_file?: string; limit?: number; offset?: number } = {}) =>
-    apiClient.get<AnomalyListResponse>("/api/anomaly/results", { params }).then((r) => r.data),
+    apiClient.get("/api/anomaly/results", { params }).then((r) => toListResponse<Anomaly>(r.data)),
   resultDetail: (id: number) => apiClient.get<Anomaly>(`/api/anomaly/results/${id}`).then((r) => r.data),
   anomalyStats: () => apiClient.get<AnomalyStats>("/api/anomaly/stats").then((r) => r.data),
   exportAnomalies: (params: { sensor_type?: string; source_file?: string; anomaly_only?: boolean } = {}) =>
