@@ -2,95 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Smart Home Anomaly Detection — warm, calm, premium design system.
+   All colors are HSL. Custom semantic tokens live here.
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Warm sand background, ink-soft foreground */
+    --background: 38 36% 96%;
+    --foreground: 222 24% 14%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 40 40% 99%;
+    --card-foreground: 222 24% 14%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 40 40% 99%;
+    --popover-foreground: 222 24% 14%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Clay / terracotta primary */
+    --primary: 14 58% 48%;
+    --primary-foreground: 40 50% 98%;
+    --primary-soft: 14 70% 94%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Calm teal secondary accent */
+    --secondary: 188 38% 92%;
+    --secondary-foreground: 192 60% 22%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 36 24% 92%;
+    --muted-foreground: 222 12% 42%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Sage accent */
+    --accent: 142 22% 90%;
+    --accent-foreground: 152 32% 22%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    /* Restrained red for anomalies */
+    --destructive: 4 64% 50%;
+    --destructive-foreground: 40 50% 98%;
+    --destructive-soft: 4 70% 96%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 30 18% 86%;
+    --input: 30 18% 88%;
+    --ring: 14 58% 48%;
 
-    --radius: 0.5rem;
+    --radius: 0.875rem;
 
-    --sidebar-background: 0 0% 98%;
+    /* Domain semantic accents */
+    --teal: 188 56% 38%;
+    --teal-foreground: 40 50% 98%;
+    --sage: 152 38% 42%;
+    --sage-foreground: 40 50% 98%;
+    --amber: 36 78% 52%;
+    --amber-foreground: 222 24% 14%;
+    --clay: 14 58% 48%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    /* Chart colors — calm, distinguishable */
+    --chart-value: 192 60% 38%;
+    --chart-recon: 36 70% 48%;
+    --chart-error: 14 58% 48%;
+    --chart-threshold: 222 12% 42%;
+    --chart-anomaly: 4 64% 50%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --shadow-sm: 0 1px 2px 0 hsl(30 30% 20% / 0.04);
+    --shadow-card: 0 4px 16px -4px hsl(30 30% 20% / 0.06), 0 1px 2px 0 hsl(30 30% 20% / 0.04);
+    --shadow-lg: 0 18px 40px -12px hsl(30 30% 20% / 0.12), 0 2px 6px 0 hsl(30 30% 20% / 0.05);
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --gradient-hero: linear-gradient(135deg, hsl(36 60% 96%) 0%, hsl(14 50% 92%) 60%, hsl(188 38% 92%) 100%);
+    --gradient-clay: linear-gradient(135deg, hsl(14 60% 50%) 0%, hsl(22 70% 56%) 100%);
 
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Sidebar */
+    --sidebar-background: 40 36% 97%;
+    --sidebar-foreground: 222 18% 22%;
+    --sidebar-primary: 14 58% 48%;
+    --sidebar-primary-foreground: 40 50% 98%;
+    --sidebar-accent: 36 28% 92%;
+    --sidebar-accent-foreground: 14 58% 38%;
+    --sidebar-border: 30 18% 88%;
+    --sidebar-ring: 14 58% 48%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 222 24% 10%;
+    --foreground: 38 30% 94%;
+    --card: 222 22% 13%;
+    --card-foreground: 38 30% 94%;
+    --popover: 222 22% 13%;
+    --popover-foreground: 38 30% 94%;
+    --primary: 14 64% 56%;
+    --primary-foreground: 40 50% 98%;
+    --primary-soft: 14 30% 22%;
+    --secondary: 192 22% 18%;
+    --secondary-foreground: 188 50% 88%;
+    --muted: 222 18% 18%;
+    --muted-foreground: 38 14% 68%;
+    --accent: 152 18% 18%;
+    --accent-foreground: 142 30% 84%;
+    --destructive: 4 64% 56%;
+    --destructive-foreground: 40 50% 98%;
+    --destructive-soft: 4 30% 20%;
+    --border: 222 14% 22%;
+    --input: 222 14% 22%;
+    --ring: 14 64% 56%;
+    --sidebar-background: 222 22% 12%;
+    --sidebar-foreground: 38 24% 88%;
+    --sidebar-primary: 14 64% 56%;
+    --sidebar-primary-foreground: 40 50% 98%;
+    --sidebar-accent: 222 18% 18%;
+    --sidebar-accent-foreground: 14 64% 70%;
+    --sidebar-border: 222 14% 22%;
+    --sidebar-ring: 14 64% 56%;
   }
 }
 
@@ -98,8 +116,78 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  html,
+  body,
+  #root {
+    @apply h-full;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: "Space Grotesk", "IBM Plex Sans", ui-sans-serif, sans-serif;
+    letter-spacing: -0.01em;
+  }
+  .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+}
+
+@layer utilities {
+  .surface-card {
+    @apply bg-card border border-border rounded-2xl;
+    box-shadow: var(--shadow-card);
+  }
+  .surface-hover {
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .surface-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: hsl(var(--border) / 0.7);
+  }
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .gradient-clay {
+    background: var(--gradient-clay);
+  }
+  .text-balance {
+    text-wrap: balance;
+  }
+  .page-fade {
+    animation: pageFade 360ms ease-out;
+  }
+  @keyframes pageFade {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .pulse-soft {
+    animation: pulseSoft 2.4s ease-in-out infinite;
+  }
+  @keyframes pulseSoft {
+    0%,
+    100% {
+      opacity: 0.55;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
   }
 }
