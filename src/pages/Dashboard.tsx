@@ -45,8 +45,14 @@ export default function Dashboard() {
   });
 
   const recentAnoms = useQuery({
-    queryKey: ["recent-anomalies"],
-    queryFn: () => api.results({ limit: 8 }),
+    queryKey: ["recent-anomalies", firstSource?.source_file, firstSource?.sensor_type],
+    queryFn: () =>
+      api.results({
+        source_file: firstSource!.source_file,
+        sensor_type: firstSource!.sensor_type,
+        limit: 500,
+      }),
+    enabled: !!firstSource,
   });
 
   const [selectedSample, setSelectedSample] = useState<string | undefined>();
@@ -120,6 +126,11 @@ export default function Dashboard() {
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       .map((d) => ({ ts: d.timestamp, value: d.value, isAnomaly: anomalyMap.get(d.id) ?? false }));
   }, [chartQuery.data, recentAnoms.data]);
+
+  const recentTrueAnomalies = useMemo(
+    () => (recentAnoms.data?.items ?? []).filter((item) => item.is_anomaly).slice(0, 8),
+    [recentAnoms.data],
+  );
 
   const s = summary.data;
 
@@ -245,14 +256,14 @@ export default function Dashboard() {
           )}
         </SectionCard>
 
-        <SectionCard title="So'nggi anomaliyalar" description="Eng yangi 8 ta natija">
+        <SectionCard title="So'nggi anomaliyalar" description="Eng yangi 8 ta anomaly yozuvi">
           {recentAnoms.isLoading ? (
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-10 w-full" />
               ))}
             </div>
-          ) : (recentAnoms.data?.items?.length ?? 0) === 0 ? (
+          ) : recentTrueAnomalies.length === 0 ? (
             <EmptyState
               title="Anomaliya topilmadi"
               description="Aniqlashni Tahlil sahifasida ishga tushiring."
@@ -260,7 +271,7 @@ export default function Dashboard() {
             />
           ) : (
             <ul className="divide-y divide-border/60 -mx-2">
-              {recentAnoms.data!.items.map((a) => (
+              {recentTrueAnomalies.map((a) => (
                 <li key={a.id} className="flex items-center justify-between gap-3 px-2 py-2.5">
                   <div className="min-w-0">
                     <div className="text-sm font-medium truncate">{a.sensor_type}</div>
@@ -269,13 +280,13 @@ export default function Dashboard() {
                   <div className="text-right shrink-0">
                     <div className="font-mono text-xs tabular-nums">{formatNumber(a.value, 3)}</div>
                     <Badge
-                      variant={a.is_anomaly ? "destructive" : "secondary"}
+                      variant="destructive"
                       className={cn(
                         "mt-0.5 text-[10px] px-1.5 py-0",
-                        a.is_anomaly && "bg-destructive-soft text-destructive border-destructive/30 hover:bg-destructive-soft"
+                        "bg-destructive-soft text-destructive border-destructive/30 hover:bg-destructive-soft"
                       )}
                     >
-                      {a.is_anomaly ? "Anomaliya" : "Normal"}
+                      Anomaliya
                     </Badge>
                   </div>
                 </li>

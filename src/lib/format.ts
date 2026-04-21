@@ -19,16 +19,46 @@ function pad(n: number) {
   return n.toString().padStart(2, "0");
 }
 
+export function remapLegacyDate(value?: string | Date | null): Date | null {
+  if (!value) return null;
+  const original = typeof value === "string" ? new Date(value) : new Date(value);
+  if (isNaN(original.getTime())) return null;
+
+  const now = new Date();
+  if (original.getFullYear() >= now.getFullYear() - 1) {
+    return original;
+  }
+
+  const currentYearCandidate = new Date(original);
+  currentYearCandidate.setFullYear(now.getFullYear());
+
+  if (currentYearCandidate.getTime() <= now.getTime()) {
+    return currentYearCandidate;
+  }
+
+  const previousYearCandidate = new Date(original);
+  previousYearCandidate.setFullYear(now.getFullYear() - 1);
+  return previousYearCandidate;
+}
+
 export function formatDateTime(value?: string | Date | null): string {
   if (!value) return "—";
-  const d = typeof value === "string" ? new Date(value) : value;
+  const d = remapLegacyDate(value);
+  if (!d) return "—";
   if (isNaN(d.getTime())) return "—";
   return `${d.getDate()}-${UZ_MONTHS[d.getMonth()]} ${d.getFullYear()}, ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+export function formatShortDateTime(value?: string | Date | null): string {
+  const d = remapLegacyDate(value);
+  if (!d) return "—";
+  if (isNaN(d.getTime())) return "—";
+  return `${d.getDate()}/${d.getMonth() + 1} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 export function formatTime(value?: string | Date | null): string {
   if (!value) return "—";
-  const d = typeof value === "string" ? new Date(value) : value;
+  const d = remapLegacyDate(value);
   if (isNaN(d.getTime())) return "—";
   return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }

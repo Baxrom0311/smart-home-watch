@@ -14,7 +14,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatDateTime, formatNumber } from "@/lib/format";
+import { formatDateTime, formatNumber, formatShortDateTime, remapLegacyDate } from "@/lib/format";
 
 const grid = "hsl(30 18% 86%)";
 const axis = "hsl(222 12% 42%)";
@@ -39,9 +39,10 @@ interface SeriesPoint {
 
 function tickDate(v: any) {
   try {
-    const d = new Date(v);
+    const d = remapLegacyDate(v);
+    if (!d) return String(v);
     if (isNaN(d.getTime())) return String(v);
-    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    return formatShortDateTime(d);
   } catch {
     return String(v);
   }
